@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { Heart, RefreshCw, WifiOff } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { apiErrorMessage } from "../api/client";
 import type { Fact } from "../api/types";
@@ -7,6 +8,11 @@ import { PageHeader } from "../components/PageHeader";
 import { PageState } from "../components/PageState";
 import { useAuthenticatedApi } from "../hooks/useAuthenticatedApi";
 import { useLikeFact } from "../hooks/useLikeFact";
+import {
+  CAT_IMAGES,
+  pickNextCatImageIndex,
+  type CatImage,
+} from "../lib/catImages";
 
 export function DiscoverPage() {
   const api = useAuthenticatedApi();
@@ -16,6 +22,23 @@ export function DiscoverPage() {
     queryFn: ({ signal }) => api.randomFact(signal),
     staleTime: Infinity,
   });
+  const [imageIndex, setImageIndex] = useState(() =>
+    pickNextCatImageIndex(null),
+  );
+
+  useEffect(() => {
+    for (const { src } of CAT_IMAGES) {
+      const image = new Image();
+      image.src = src;
+    }
+  }, []);
+
+  async function showAnotherFact() {
+    const result = await query.refetch();
+    if (result.isSuccess) {
+      setImageIndex((previous) => pickNextCatImageIndex(previous));
+    }
+  }
 
   return (
     <>
@@ -26,7 +49,7 @@ export function DiscoverPage() {
           <button
             type="button"
             className="inline-flex h-10 items-center justify-center gap-2 rounded-md bg-brand-700 px-4 text-sm font-bold text-white hover:bg-brand-800 disabled:opacity-60"
-            onClick={() => void query.refetch()}
+            onClick={() => void showAnotherFact()}
             disabled={query.isFetching}
           >
             <RefreshCw
@@ -61,6 +84,7 @@ export function DiscoverPage() {
       {query.data && (
         <FeaturedFact
           fact={query.data}
+          image={CAT_IMAGES[imageIndex]}
           pending={likeMutation.isPending}
           onToggleLike={(fact) => likeMutation.mutate(fact)}
         />
@@ -71,10 +95,12 @@ export function DiscoverPage() {
 
 function FeaturedFact({
   fact,
+  image,
   pending,
   onToggleLike,
 }: {
   fact: Fact;
+  image: CatImage;
   pending: boolean;
   onToggleLike: (fact: Fact) => void;
 }) {
@@ -113,8 +139,9 @@ function FeaturedFact({
         </footer>
       </div>
       <img
-        src="/cat-discover.jpg"
-        alt="Gato naranja mirando hacia arriba"
+        key={image.src}
+        src={image.src}
+        alt={image.alt}
         className="h-64 w-full object-cover md:h-full"
       />
     </article>
