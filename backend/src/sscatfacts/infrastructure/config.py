@@ -9,6 +9,10 @@ class Settings(BaseSettings):
     cat_fact_timeout_seconds: float = 3.0
     cat_fact_max_retries: int = 1
     cors_origins: str = "http://localhost:5173"
+    supabase_url: str = ""
+    supabase_anon_key: str = ""
+    supabase_jwt_audience: str = "authenticated"
+    supabase_jwks_cache_seconds: int = 600
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

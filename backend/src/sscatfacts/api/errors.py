@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 
 ERROR_STATUS = {
     "authentication_required": 401,
+    "invalid_access_token": 401,
+    "authentication_unavailable": 503,
     "user_not_found": 404,
     "fact_not_found": 404,
     "username_taken": 409,
