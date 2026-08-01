@@ -26,8 +26,7 @@
 - `.env.example` contiene todas las variables requeridas, sin credenciales
   reales.
 - Solo las variables con prefijo `VITE_` pueden llegar al navegador.
-- `SUPABASE_SERVICE_ROLE_KEY`, `DATABASE_URL` y `DIRECT_DATABASE_URL` son
-  secretos exclusivos del backend.
+- `DATABASE_URL` es un secreto exclusivo del backend.
 - Se agrega una variable nueva a `.env.example` en el mismo cambio que comienza
   a utilizarla.
 

@@ -7,4 +7,4 @@ if (-not (Test-Path "backend/.venv")) {
 }
 
 & backend/.venv/Scripts/python.exe -m pip install --upgrade pip
-& backend/.venv/Scripts/python.exe -m pip install -e "backend[dev]"
+& backend/.venv/Scripts/python.exe -m pip install -r backend/requirements.txt

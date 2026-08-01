@@ -4,7 +4,6 @@ services:
   backend:
     build:
       context: ./backend
-      target: development
     env_file:
       - .env
     environment:
@@ -14,6 +13,8 @@ services:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
       - ./backend/src:/app/src
+      - ./backend/tests:/app/tests
+      - ./backend/pyproject.toml:/app/pyproject.toml
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
       interval: 10s
@@ -23,7 +24,6 @@ services:
   frontend:
     build:
       context: ./frontend
-      target: development
     env_file:
       - .env
     environment:
