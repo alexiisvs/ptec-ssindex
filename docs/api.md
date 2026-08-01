@@ -2,9 +2,9 @@
 
 Base URL: `http://localhost:8000/api/v1`
 
-Hasta integrar Supabase Auth, los endpoints protegidos reciben un UUID mediante
-el header `X-User-ID`. La rama de autenticacion reemplazara esta dependencia por
-el JWT sin cambiar los endpoints ni los casos de uso.
+Los endpoints protegidos reciben el access token de Supabase mediante
+`Authorization: Bearer <access_token>`. El backend obtiene el UUID exclusivamente
+del claim `sub` despues de validar el JWT.
 
 ## Endpoints
 
@@ -24,9 +24,12 @@ Ejemplo para crear un perfil local:
 ```bash
 curl -X PUT http://localhost:8000/api/v1/me/profile \
   -H "Content-Type: application/json" \
-  -H "X-User-ID: 11111111-1111-4111-8111-111111111111" \
+  -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
   -d '{"username":"demo_user"}'
 ```
+
+La disponibilidad de username y los healthchecks son publicos. Las demas rutas
+rechazan tokens ausentes, expirados, alterados o emitidos para otro proyecto.
 
 Los errores responden con:
 

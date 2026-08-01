@@ -11,8 +11,8 @@ desarrollo se ejecuta completamente con Docker Compose.
 - `frontend`: React con Vite y recarga automatica.
 
 El frontend usa Supabase Auth para registro, login, persistencia de sesion y
-cierre de sesion. La validacion del JWT en FastAPI se incorpora en la siguiente
-parte de la rama de autenticacion.
+cierre de sesion. FastAPI valida los access tokens de Supabase antes de ejecutar
+cualquier ruta protegida.
 
 ## Backend
 
@@ -25,8 +25,10 @@ domain/          Entidades, reglas y contratos de repositorios
 infrastructure/  PostgreSQL, SQLAlchemy y cliente de Cat Facts
 ```
 
-Hasta integrar Supabase Auth, los endpoints protegidos usan el header temporal
-`X-User-ID` con un UUID.
+Los endpoints protegidos reciben `Authorization: Bearer <access_token>`. El
+backend valida firma, issuer, audience, expiracion, rol y UUID del usuario. Los
+proyectos con llaves asimetricas usan JWKS con cache de 10 minutos; los proyectos
+antiguos con HS256 se validan contra Supabase Auth.
 
 ## Supabase Auth
 
@@ -35,15 +37,18 @@ confirmacion de correo para que el onboarding de la demo ocurra en un solo
 paso. Copia la URL del proyecto y la clave publica `anon` en `.env`:
 
 ```env
+SUPABASE_URL=https://tu-proyecto.supabase.co
+SUPABASE_ANON_KEY=tu-clave-publica-anon
 VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
 VITE_SUPABASE_ANON_KEY=tu-clave-publica-anon
 ```
 
-Estas variables se exponen en el navegador y no deben contener la clave
-`service_role`. Reinicia el frontend despues de modificarlas:
+La clave `anon` es publica y puede repetirse en ambas variables. Nunca uses la
+clave `service_role` en el frontend ni para esta validacion. Reinicia backend y
+frontend despues de modificar el archivo:
 
 ```bash
-docker compose up --build -d frontend
+docker compose up --build -d backend frontend
 ```
 
 La interfaz bloquea el formulario durante 15 minutos al completar cinco
