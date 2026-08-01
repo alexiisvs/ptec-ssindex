@@ -31,6 +31,7 @@ def access_token(
     *,
     audience: str = AUDIENCE,
     expires_at: datetime | None = None,
+    issued_at: datetime | None = None,
 ) -> str:
     now = datetime.now(UTC)
     return jwt.encode(
@@ -38,7 +39,7 @@ def access_token(
             "aud": audience,
             "email": "cat@example.com",
             "exp": expires_at or now + timedelta(minutes=5),
-            "iat": now,
+            "iat": issued_at or now,
             "iss": ISSUER,
             "role": "authenticated",
             "sub": str(user_id),
@@ -111,6 +112,44 @@ def test_rejects_malformed_token_without_calling_supabase() -> None:
 
     with pytest.raises(InvalidAccessTokenError):
         asyncio.run(verifier.verify("not-a-jwt"))
+
+
+def test_allows_small_clock_skew_in_new_tokens() -> None:
+    private_key, jwk = signing_material()
+    user_id = uuid4()
+    token = access_token(
+        private_key,
+        user_id,
+        issued_at=datetime.now(UTC) + timedelta(seconds=5),
+    )
+    verifier = SupabaseAccessTokenVerifier(
+        "https://project-ref.supabase.co",
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(200, json={"keys": [jwk]})
+        ),
+    )
+
+    authenticated_user = asyncio.run(verifier.verify(token))
+
+    assert authenticated_user.id == user_id
+
+
+def test_rejects_token_outside_clock_skew() -> None:
+    private_key, jwk = signing_material()
+    token = access_token(
+        private_key,
+        uuid4(),
+        issued_at=datetime.now(UTC) + timedelta(seconds=30),
+    )
+    verifier = SupabaseAccessTokenVerifier(
+        "https://project-ref.supabase.co",
+        transport=httpx.MockTransport(
+            lambda _: httpx.Response(200, json={"keys": [jwk]})
+        ),
+    )
+
+    with pytest.raises(InvalidAccessTokenError):
+        asyncio.run(verifier.verify(token))
 
 
 def test_legacy_hs256_token_is_validated_by_supabase_auth() -> None:
