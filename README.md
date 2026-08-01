@@ -55,6 +55,23 @@ La interfaz bloquea el formulario durante 15 minutos al completar cinco
 intentos fallidos. Este bloqueo mejora el feedback local; la proteccion de
 seguridad real sigue dependiendo del rate limit de Supabase.
 
+## Frontend
+
+La aplicacion usa React, TypeScript, Vite y Tailwind CSS. TanStack Query maneja
+cache, paginacion y actualizaciones optimistas; React Hook Form y Zod validan los
+formularios; Sonner muestra el resultado de las acciones.
+
+Las rutas protegidas son:
+
+- `/app/discover`: consulta un fact aleatorio y permite guardarlo.
+- `/app/favorites`: lista paginada de facts guardados.
+- `/app/popular`: ranking comunitario paginado.
+- `/app/account`: consulta y actualizacion del perfil y cierre de sesion.
+
+En escritorio se usa navegacion lateral y en pantallas pequenas una barra
+inferior. Todas las consultas protegidas envian automaticamente el access token
+de Supabase a FastAPI.
+
 ## Setup
 
 Abre Ubuntu/WSL y entra al repositorio:

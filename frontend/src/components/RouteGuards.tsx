@@ -27,15 +27,15 @@ export function ConfigurationScreen() {
 }
 
 export function ProtectedRoute({ children }: { children: ReactNode }) {
-  const { configured, loading, session } = useAuth();
-  if (loading) return <LoadingScreen />;
+  const { authenticating, configured, loading, session } = useAuth();
+  if (loading || authenticating) return <LoadingScreen />;
   if (!configured) return <ConfigurationScreen />;
   return session ? children : <Navigate to="/login" replace />;
 }
 
 export function PublicOnlyRoute({ children }: { children: ReactNode }) {
-  const { configured, loading, session } = useAuth();
+  const { authenticating, configured, loading, session } = useAuth();
   if (loading) return <LoadingScreen />;
   if (!configured) return <ConfigurationScreen />;
-  return session ? <Navigate to="/app" replace /> : children;
+  return session && !authenticating ? <Navigate to="/app" replace /> : children;
 }

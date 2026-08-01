@@ -1,3 +1,12 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #edf7f3;
+  --color-brand-100: #d7ede4;
+  --color-brand-700: #12664f;
+  --color-brand-800: #0d543f;
+}
+
 :root {
   color: #202427;
   background: #f4f6f5;
@@ -42,12 +51,15 @@ button:disabled {
 }
 
 a {
-  color: #12664f;
-  font-weight: 650;
   text-decoration: none;
 }
 
-a:hover {
+.auth-switch a {
+  color: #12664f;
+  font-weight: 650;
+}
+
+.auth-switch a:hover {
   text-decoration: underline;
 }
 

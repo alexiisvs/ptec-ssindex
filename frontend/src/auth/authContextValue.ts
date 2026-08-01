@@ -14,6 +14,7 @@ export type SignUpResult = {
 export type AuthContextValue = {
   configured: boolean;
   loading: boolean;
+  authenticating: boolean;
   session: Session | null;
   user: User | null;
   signIn: (email: string, password: string) => Promise<void>;
