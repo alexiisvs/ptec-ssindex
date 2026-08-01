@@ -1,14 +1,428 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #edf7f3;
+  --color-brand-100: #d7ede4;
+  --color-brand-700: #12664f;
+  --color-brand-800: #0d543f;
+}
+
 :root {
-  color: #1f2933;
-  background: #f7f8fa;
-  font-family: Inter, system-ui, sans-serif;
+  color: #202427;
+  background: #f4f6f5;
+  font-family:
+    Inter,
+    ui-sans-serif,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
 }
 
 body {
+  min-width: 320px;
+  min-height: 100vh;
   margin: 0;
 }
 
-main {
-  width: min(100% - 2rem, 64rem);
-  margin: 4rem auto;
+button,
+input {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+a {
+  text-decoration: none;
+}
+
+.auth-switch a {
+  color: #12664f;
+  font-weight: 650;
+}
+
+.auth-switch a:hover {
+  text-decoration: underline;
+}
+
+.auth-page,
+.status-page {
+  display: grid;
+  min-height: 100vh;
+  place-items: center;
+  padding: 32px 20px;
+}
+
+.auth-panel {
+  width: min(100%, 430px);
+  padding: 32px;
+  background: #ffffff;
+  border: 1px solid #dce2df;
+  border-radius: 8px;
+  box-shadow: 0 14px 36px rgb(28 40 35 / 8%);
+}
+
+.brand,
+.app-brand,
+.section-heading {
+  display: flex;
+  align-items: center;
+}
+
+.brand {
+  gap: 12px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid #e7ebe9;
+}
+
+.brand-mark {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  color: #ffffff;
+  background: #12664f;
+  border-radius: 8px;
+  place-items: center;
+}
+
+.brand strong,
+.brand span {
+  display: block;
+}
+
+.brand strong {
+  font-size: 18px;
+}
+
+.brand span {
+  margin-top: 2px;
+  color: #68736e;
+  font-size: 13px;
+}
+
+.auth-heading {
+  margin: 28px 0 24px;
+}
+
+.auth-heading h1,
+.section-heading h1,
+.configuration-message h1 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.auth-heading h1 {
+  font-size: 25px;
+  line-height: 1.2;
+}
+
+.auth-heading p,
+.section-heading p,
+.configuration-message p {
+  margin: 7px 0 0;
+  color: #68736e;
+  line-height: 1.5;
+}
+
+form {
+  display: grid;
+  gap: 18px;
+}
+
+.field {
+  display: grid;
+  gap: 7px;
+}
+
+.field label {
+  color: #353b38;
+  font-size: 14px;
+  font-weight: 650;
+}
+
+.field input {
+  width: 100%;
+  height: 44px;
+  padding: 0 12px;
+  color: #202427;
+  background: #ffffff;
+  border: 1px solid #b9c2be;
+  border-radius: 6px;
+  outline: none;
+  transition:
+    border-color 120ms ease,
+    box-shadow 120ms ease;
+}
+
+.field input:focus {
+  border-color: #12664f;
+  box-shadow: 0 0 0 3px rgb(18 102 79 / 15%);
+}
+
+.field input[aria-invalid="true"] {
+  border-color: #b33a3a;
+}
+
+.password-input {
+  position: relative;
+}
+
+.password-input input {
+  padding-right: 48px;
+}
+
+.icon-button {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  color: #59635f;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+  place-items: center;
+}
+
+.icon-button:hover {
+  color: #12664f;
+  background: #edf5f1;
+}
+
+.field-error {
+  color: #a42d2d;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.form-alert,
+.form-success {
+  padding: 11px 12px;
+  border-radius: 6px;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.form-alert {
+  color: #862626;
+  background: #fff1f0;
+  border: 1px solid #efc3c0;
+}
+
+.form-success {
+  color: #145c3d;
+  background: #edf8f2;
+  border: 1px solid #b8ddc9;
+}
+
+.primary-button,
+.secondary-button {
+  display: inline-flex;
+  height: 44px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.primary-button {
+  width: 100%;
+  color: #ffffff;
+  background: #12664f;
+  border: 1px solid #12664f;
+}
+
+.primary-button:hover:not(:disabled) {
+  background: #0d543f;
+}
+
+.primary-button:disabled {
+  color: #e1e6e4;
+  background: #7d9189;
+  border-color: #7d9189;
+}
+
+.secondary-button {
+  padding: 0 14px;
+  color: #303633;
+  background: #ffffff;
+  border: 1px solid #c6ceca;
+}
+
+.secondary-button:hover {
+  background: #f3f6f4;
+}
+
+.auth-switch {
+  margin: 24px 0 0;
+  color: #68736e;
+  font-size: 14px;
+  text-align: center;
+}
+
+.status-page {
+  text-align: center;
+}
+
+.status-page > p {
+  color: #68736e;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #cbd6d1;
+  border-top-color: #12664f;
+  border-radius: 50%;
+  animation: spin 700ms linear infinite;
+}
+
+.configuration-message {
+  width: min(100%, 520px);
+  padding: 28px;
+  background: #ffffff;
+  border: 1px solid #dce2df;
+  border-radius: 8px;
+}
+
+.configuration-message h1 {
+  font-size: 22px;
+}
+
+.app-shell {
+  min-height: 100vh;
+  background: #f4f6f5;
+}
+
+.app-header {
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px max(20px, calc((100vw - 960px) / 2));
+  background: #ffffff;
+  border-bottom: 1px solid #dce2df;
+}
+
+.app-brand {
+  gap: 9px;
+  color: #12664f;
+}
+
+.account-page {
+  width: min(100% - 40px, 960px);
+  margin: 0 auto;
+  padding: 42px 0;
+}
+
+.section-heading {
+  gap: 12px;
+}
+
+.section-heading h1 {
+  font-size: 23px;
+}
+
+.account-details {
+  margin: 28px 0 0;
+  background: #ffffff;
+  border: 1px solid #dce2df;
+  border-radius: 8px;
+}
+
+.account-details > div {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 16px;
+  padding: 18px 20px;
+}
+
+.account-details > div + div {
+  border-top: 1px solid #e7ebe9;
+}
+
+.account-details dt {
+  color: #68736e;
+  font-size: 14px;
+}
+
+.account-details dd {
+  min-width: 0;
+  margin: 0;
+  overflow-wrap: anywhere;
+  font-weight: 650;
+}
+
+.account-page .form-alert {
+  margin-top: 20px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 540px) {
+  .auth-page {
+    align-items: start;
+    padding: 20px 14px;
+  }
+
+  .auth-panel {
+    padding: 24px 20px;
+  }
+
+  .app-header {
+    padding: 10px 16px;
+  }
+
+  .secondary-button {
+    width: 44px;
+    padding: 0;
+    font-size: 0;
+  }
+
+  .account-page {
+    width: min(100% - 28px, 960px);
+    padding: 28px 0;
+  }
+
+  .account-details > div {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

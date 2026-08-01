@@ -12,6 +12,16 @@ class AuthenticationRequiredError(DomainError):
     message = "Authentication is required"
 
 
+class InvalidAccessTokenError(DomainError):
+    code = "invalid_access_token"
+    message = "Access token is invalid or expired"
+
+
+class AuthenticationUnavailableError(DomainError):
+    code = "authentication_unavailable"
+    message = "Authentication service is unavailable"
+
+
 class UserNotFoundError(DomainError):
     code = "user_not_found"
     message = "User profile was not found"
