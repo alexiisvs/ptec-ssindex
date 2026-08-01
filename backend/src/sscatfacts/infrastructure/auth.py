@@ -27,6 +27,7 @@ class SupabaseAccessTokenVerifier:
         audience: str = "authenticated",
         jwks_cache_seconds: int = 600,
         timeout_seconds: float = 3.0,
+        clock_skew_seconds: float = 10.0,
         transport: httpx.AsyncBaseTransport | None = None,
     ) -> None:
         base_url = supabase_url.rstrip("/")
@@ -37,6 +38,7 @@ class SupabaseAccessTokenVerifier:
         self.audience = audience
         self.jwks_cache_seconds = jwks_cache_seconds
         self.timeout_seconds = timeout_seconds
+        self.clock_skew_seconds = clock_skew_seconds
         self.transport = transport
         self._keys: dict[str, PyJWK] = {}
         self._keys_expire_at = 0.0
@@ -69,6 +71,7 @@ class SupabaseAccessTokenVerifier:
                 algorithms=[algorithm],
                 audience=self.audience,
                 issuer=self.issuer,
+                leeway=self.clock_skew_seconds,
                 options={"require": ["aud", "exp", "iss", "sub"]},
             )
         except PyJwtInvalidTokenError as error:
@@ -159,6 +162,7 @@ class SupabaseAccessTokenVerifier:
                 },
                 audience=self.audience,
                 issuer=self.issuer,
+                leeway=self.clock_skew_seconds,
             )
         except (ValueError, PyJwtInvalidTokenError) as error:
             raise InvalidAccessTokenError() from error

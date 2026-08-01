@@ -1,6 +1,9 @@
 import { AuthError } from "@supabase/supabase-js";
 
+import { ApiError, apiErrorMessage } from "../api/client";
+
 export function authErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) return apiErrorMessage(error);
   if (!(error instanceof AuthError)) {
     return error instanceof Error
       ? error.message
