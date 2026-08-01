@@ -1,29 +1,67 @@
 name: sscatfacts
 
 services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-sscatfacts}
+      POSTGRES_USER: ${POSTGRES_USER:-sscatfacts}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-sscatfacts}
+    ports:
+      - "${POSTGRES_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  migrations:
+    build:
+      context: ./backend
+      target: development
+    environment:
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sscatfacts}:${POSTGRES_PASSWORD:-sscatfacts}@postgres:5432/${POSTGRES_DB:-sscatfacts}
+    command: alembic upgrade head
+    volumes:
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/migrations:/app/migrations
+      - ./backend/src:/app/src
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   backend:
     build:
       context: ./backend
+      target: development
     env_file:
       - .env
     environment:
-      BACKEND_HOST: 0.0.0.0
-      BACKEND_PORT: 8000
+      DATABASE_URL: postgresql+psycopg://${POSTGRES_USER:-sscatfacts}:${POSTGRES_PASSWORD:-sscatfacts}@postgres:5432/${POSTGRES_DB:-sscatfacts}
     ports:
       - "${BACKEND_PORT:-8000}:8000"
     volumes:
+      - ./backend/alembic.ini:/app/alembic.ini
+      - ./backend/migrations:/app/migrations
+      - ./backend/pyproject.toml:/app/pyproject.toml
       - ./backend/src:/app/src
       - ./backend/tests:/app/tests
-      - ./backend/pyproject.toml:/app/pyproject.toml
     healthcheck:
-      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/live')"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
       interval: 10s
       timeout: 3s
       retries: 5
+      start_period: 10s
+    depends_on:
+      migrations:
+        condition: service_completed_successfully
 
   frontend:
     build:
       context: ./frontend
+      target: development
     env_file:
       - .env
     environment:
@@ -33,8 +71,17 @@ services:
     ports:
       - "${FRONTEND_PORT:-5173}:5173"
     volumes:
-      - ./frontend/src:/app/src
       - ./frontend/index.html:/app/index.html
+      - ./frontend/src:/app/src
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1:5173"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
     depends_on:
       backend:
         condition: service_healthy
+
+volumes:
+  postgres_data:
