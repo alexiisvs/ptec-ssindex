@@ -4,7 +4,8 @@ from os import environ
 from alembic import context
 from sqlalchemy import engine_from_config, pool
 
-from sscatfacts.database import Base
+from sscatfacts.infrastructure import models  # noqa: F401
+from sscatfacts.infrastructure.database import Base
 
 config = context.config
 

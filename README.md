@@ -13,6 +13,20 @@ desarrollo se ejecuta completamente con Docker Compose.
 Supabase se incorporara en la rama de autenticacion. Esta etapa no configura
 usuarios ni login.
 
+## Backend
+
+El codigo del backend se divide en cuatro capas:
+
+```text
+api/             Endpoints, schemas y errores HTTP
+application/     Casos de uso de usuarios, facts y likes
+domain/          Entidades, reglas y contratos de repositorios
+infrastructure/  PostgreSQL, SQLAlchemy y cliente de Cat Facts
+```
+
+Hasta integrar Supabase Auth, los endpoints protegidos usan el header temporal
+`X-User-ID` con un UUID.
+
 ## Setup
 
 Abre Ubuntu/WSL y entra al repositorio:
@@ -120,3 +134,6 @@ docker compose exec frontend npm run typecheck
 
 Las convenciones de API y codigo estan en
 [`docs/conventions.md`](docs/conventions.md).
+
+Los endpoints y el header temporal de desarrollo estan documentados en
+[`docs/api.md`](docs/api.md).

@@ -1,17 +1,16 @@
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from collections.abc import AsyncIterator
+
 from sqlalchemy import MetaData, text
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
+from sqlalchemy.ext.asyncio import (
+    AsyncEngine,
+    AsyncSession,
+    async_sessionmaker,
+    create_async_engine,
+)
 from sqlalchemy.orm import DeclarativeBase
 
-
-class Settings(BaseSettings):
-    database_url: str = (
-        "postgresql+psycopg://sscatfacts:sscatfacts@postgres:5432/sscatfacts"
-    )
-
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
-
+from sscatfacts.infrastructure.config import get_settings
 
 convention = {
     "ix": "ix_%(column_0_label)s",
@@ -26,8 +25,14 @@ class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=convention)
 
 
-settings = Settings()
+settings = get_settings()
 engine: AsyncEngine = create_async_engine(settings.database_url, pool_pre_ping=True)
+session_factory = async_sessionmaker(engine, expire_on_commit=False)
+
+
+async def get_session() -> AsyncIterator[AsyncSession]:
+    async with session_factory() as session:
+        yield session
 
 
 async def database_is_ready() -> bool:
