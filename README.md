@@ -1,21 +1,17 @@
 # SSCatFacts
 
-Monorepo con frontend React, backend FastAPI y Supabase para autenticacion y
-PostgreSQL. El entorno local se ejecuta completamente con Docker Compose.
+Monorepo con frontend React, backend FastAPI y PostgreSQL local. El entorno de
+desarrollo se ejecuta completamente con Docker Compose.
 
-## Estructura
+## Servicios
 
-```text
-backend/   API, requirements y configuracion Python
-frontend/  Aplicacion React
-docs/      Convenciones del proyecto
-scripts/   Comandos auxiliares para PowerShell
-```
+- `postgres`: PostgreSQL 17 para desarrollo local.
+- `migrations`: ejecuta `alembic upgrade head` y termina.
+- `backend`: FastAPI con recarga automatica.
+- `frontend`: React con Vite y recarga automatica.
 
-## Requisito
-
-Docker con Docker Compose disponible en Ubuntu/WSL. No necesitas instalar
-Python, Node ni PostgreSQL localmente para ejecutar el proyecto.
+Supabase se incorporara en la rama de autenticacion. Esta etapa no configura
+usuarios ni login.
 
 ## Setup
 
@@ -25,21 +21,19 @@ Abre Ubuntu/WSL y entra al repositorio:
 cd /mnt/c/Users/alexi/Desktop/Trabajo/ptec-ssindex
 ```
 
-Crea el archivo de configuracion la primera vez:
+Crea la configuracion local la primera vez:
 
 ```bash
 cp -n .env.example .env
-nano .env
 ```
 
-Completa en `.env` la URL, clave publica y cadena PostgreSQL de tu proyecto de
-Supabase. Luego construye y levanta backend y frontend juntos:
+Construye y levanta el entorno:
 
 ```bash
 docker compose up --build -d
 ```
 
-El frontend espera a que el backend este saludable antes de iniciar. Revisa el
+El orden de inicio es PostgreSQL, migraciones, backend y frontend. Revisa el
 estado y los logs con:
 
 ```bash
@@ -47,70 +41,79 @@ docker compose ps
 docker compose logs -f
 ```
 
-Para salir de los logs presiona `Ctrl+C`; los servicios continuaran levantados.
+El contenedor `migrations` debe aparecer con estado `Exited (0)`, porque termina
+despues de aplicar las migraciones. Los otros tres deben quedar saludables.
 
-Servicios:
+Servicios disponibles:
 
 - Frontend: `http://localhost:5173`
 - Backend: `http://localhost:8000`
 - OpenAPI: `http://localhost:8000/docs`
-- Healthcheck: `http://localhost:8000/health/live`
+- Backend live: `http://localhost:8000/health/live`
+- Backend ready: `http://localhost:8000/health/ready`
+- PostgreSQL local: `localhost:5433`
 
 ## Uso diario
 
-Apaga y elimina los contenedores para liberar CPU y memoria:
+El codigo en `frontend/src`, `backend/src`, `backend/tests` y las migraciones
+esta montado como volumen. Los cambios normales se recargan automaticamente.
 
 ```bash
+# Pausar y reanudar
+docker compose pause
+docker compose unpause
+
+# Apagar y eliminar contenedores sin borrar la base
 docker compose down
-```
 
-Las imagenes quedan guardadas en disco. Para volver a levantar el proyecto sin
-reinstalar todo:
-
-```bash
+# Volver a levantar usando las imagenes existentes
 docker compose up -d
-```
 
-`docker compose down` es suficiente para que esta aplicacion no consuma CPU ni
-memoria. Si Docker fue instalado directamente en Ubuntu y tambien quieres
-apagar su servicio, usa:
-
-```bash
-sudo service docker stop
-sudo service docker start
-```
-
-El segundo comando vuelve a iniciar Docker antes del proximo `docker compose
-up`. Si usas Docker Desktop, el equivalente es cerrar y volver a abrir Docker
-Desktop.
-
-Si cambiaste `backend/requirements.txt`, `frontend/package.json` o un
-Dockerfile, reconstruye las imagenes:
-
-```bash
+# Reconstruir despues de cambiar requirements, package.json o Dockerfiles
 docker compose up --build -d
 ```
 
+Los datos de PostgreSQL se conservan en el volumen `postgres_data`. Para borrar
+completamente la base local y comenzar de cero:
+
+```bash
+docker compose down -v
+docker compose up --build -d
+```
+
+El primer comando elimina los datos locales de forma irreversible.
+
 ## Dependencias
 
-Docker instala las dependencias durante la construccion de cada imagen:
+Docker instala las dependencias al construir las imagenes:
 
-- El backend ejecuta `pip install -r requirements.txt` desde
-  `backend/Dockerfile`.
-- El frontend ejecuta `npm install` desde `frontend/Dockerfile`.
+- Backend: `pip install -r requirements.txt`.
+- Frontend: `npm install` usando `package.json`.
 
-Docker guarda estas capas en cache. Mientras los archivos de dependencias no
-cambien, los siguientes arranques reutilizan la instalacion anterior. Hay un
-solo archivo `backend/requirements.txt` con dependencias de aplicacion y
-desarrollo.
+Existe un solo archivo `backend/requirements.txt`. Docker reutiliza su cache
+mientras ese archivo no cambie.
+
+## Migraciones
+
+Alembic aplica las migraciones automaticamente al levantar el entorno. Para
+crear una migracion nueva despues de modificar modelos:
+
+```bash
+docker compose run --rm backend alembic revision --autogenerate -m "descripcion"
+docker compose run --rm migrations
+```
+
+La migracion inicial es una linea base vacia; las tablas de negocio se agregaran
+en la rama del core del backend.
 
 ## Calidad
 
-Con los contenedores levantados puedes ejecutar:
+Con los contenedores levantados:
 
 ```bash
-docker compose exec backend ruff check src tests
+docker compose exec backend ruff check src tests migrations
 docker compose exec backend mypy src tests
+docker compose exec backend pytest
 docker compose exec frontend npm run lint
 docker compose exec frontend npm run typecheck
 ```
