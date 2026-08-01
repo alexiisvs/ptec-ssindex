@@ -10,8 +10,9 @@ desarrollo se ejecuta completamente con Docker Compose.
 - `backend`: FastAPI con recarga automatica.
 - `frontend`: React con Vite y recarga automatica.
 
-Supabase se incorporara en la rama de autenticacion. Esta etapa no configura
-usuarios ni login.
+El frontend usa Supabase Auth para registro, login, persistencia de sesion y
+cierre de sesion. La validacion del JWT en FastAPI se incorpora en la siguiente
+parte de la rama de autenticacion.
 
 ## Backend
 
@@ -26,6 +27,28 @@ infrastructure/  PostgreSQL, SQLAlchemy y cliente de Cat Facts
 
 Hasta integrar Supabase Auth, los endpoints protegidos usan el header temporal
 `X-User-ID` con un UUID.
+
+## Supabase Auth
+
+En el proyecto de Supabase, habilita el proveedor Email y desactiva la
+confirmacion de correo para que el onboarding de la demo ocurra en un solo
+paso. Copia la URL del proyecto y la clave publica `anon` en `.env`:
+
+```env
+VITE_SUPABASE_URL=https://tu-proyecto.supabase.co
+VITE_SUPABASE_ANON_KEY=tu-clave-publica-anon
+```
+
+Estas variables se exponen en el navegador y no deben contener la clave
+`service_role`. Reinicia el frontend despues de modificarlas:
+
+```bash
+docker compose up --build -d frontend
+```
+
+La interfaz bloquea el formulario durante 15 minutos al completar cinco
+intentos fallidos. Este bloqueo mejora el feedback local; la proteccion de
+seguridad real sigue dependiendo del rate limit de Supabase.
 
 ## Setup
 
@@ -102,7 +125,7 @@ El primer comando elimina los datos locales de forma irreversible.
 Docker instala las dependencias al construir las imagenes:
 
 - Backend: `pip install -r requirements.txt`.
-- Frontend: `npm install` usando `package.json`.
+- Frontend: `npm ci` usando `package.json` y `package-lock.json`.
 
 Existe un solo archivo `backend/requirements.txt`. Docker reutiliza su cache
 mientras ese archivo no cambie.
@@ -130,6 +153,7 @@ docker compose exec backend mypy src tests
 docker compose exec backend pytest
 docker compose exec frontend npm run lint
 docker compose exec frontend npm run typecheck
+docker compose exec frontend npm run test
 ```
 
 Las convenciones de API y codigo estan en
